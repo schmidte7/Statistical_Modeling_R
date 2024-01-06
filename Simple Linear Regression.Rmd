@@ -1,0 +1,253 @@
+---
+title: "Simple Linear Regression II"
+author: "Emily Schmidt"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: true # creating a table of contents (toc)
+    toc_float: 
+      collapsed: false # toc does not collapse and is shown as a sidebar (toc_float)
+    number_sections: true # document sections are numbered
+    theme: cosmo
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{=html}
+<style>
+body{
+  color: #000000;
+  background-color: #D5CABC;
+}
+pre{
+  background-color: #FFF8EE;
+}
+pre:not([class]){
+  background-color: #B6A999;
+}
+.toc-content{
+  padding-left: 10px;
+  padding-right: 10px;
+}
+.col-sm-8 {
+  width: 75%;
+}
+code {
+  color: #000000;
+}
+pre code {
+  white-space: pre-wrap;
+}
+
+
+</style>
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## **Objectives**  
+### *Analysis of the results*  
+– Regression summaries in R  
+– Viewing detailed contents of the objects  
+– Residuals analysis  
+* Fitted values versus residuals  
+* Normal Q-Q plot of residuals  
+* Autocorrelations of residuals  
+– Visualisation of the regression line  
+– Confidence intervals for the predicted responses  
+* Computation  
+* Visualisation  
+
+```{r, message=FALSE, warning=FALSE}
+library(robust)
+library(data.table) # Fast aggregation of large data sets and a fast file reader
+library(lubridate) # Commute date-times
+library(ggplot2) # Provides helpful commands to create complex plots from data in a data frame
+
+setwd("C:\\Users\\emssc\\R") # Set directory
+getwd() # Check the working directory
+
+Alphabet = read.csv("Alphabet.csv", row.names=1)
+Alphabet
+PretBanc = read.csv("PretBanc.csv")
+SAT = read.table("SAT.txt", header=TRUE, row.names=1)
+source("R2wRob.R")
+source("TabPredict.R")
+
+```
+
+## 1 Analysis of the results  
+Once the different parameters are estimated and the results stored as R objects, one can simply use the function summary() to get the principal results of the analysis. To compare the results of different methods, one can use the function fit.models() from the package fit.models (automatically loaded when the package robust has been loaded). It allows us to combine different results into a single R object. Using then the function summary() again, R will print the combined results of the new object.  
+In this way it will be much easier to compare different estimations.
+For example, continuing from the previous practicals ‘TP 3’:
+
+```{r}
+require(robust)
+alph.ls = lm(Alphabetises ~ GNP, data=Alphabet)
+alph.m90 = lmRob(Alphabetises ~ GNP, data=Alphabet)
+
+alph.lsm90 = fit.models(alph.ls, alph.m90)
+alph.lsm90
+summary(alph.lsm90)
+summary(alph.m90)
+R2wRob(alph.m90)
+
+```
+
+## 1.1 Regression summaries in R  
+The standard summaries contain the following elements:   
+ Calls: the R syntax used to get the results.  
+ Residuals Statistics: the five-number summaries of the residuals, i.e. minimum, lower/first quartile, median, upper/third quartile, maximum.  
+ Coefficients: information concerning the estimated parameters (Estimate), their standard errors (Std. Error), and the resulting test statistics (t value) and the corresponding p-values (Pr(> |t|)).  
+ Residual Scale Estimates: estimated standard error of the residuals, i.e. σˆ.  
+ Multiple R-squared: value of the coefficient of determination R2
+.  
+ Test for Bias: results for the test of bias, available only for robust estimations.  
+
+## 1.2 Viewing detailed contents of the objects  
+It might happen that one would like more information than those provided by the standard summaries in R. In this case one can directly check the objects containing these information. One can find out
+about the contents of an object by typing names(obj), where obj is the name of the object where the results are stored. To access directly a particular content one can use the symbol ‘$’ followed by the name of the desired element. Try out the following commands and comment:
+
+```{r}
+alph.lsm90
+names(alph.lsm90)
+names(alph.lsm90$alph.ls)
+names(alph.lsm90$alph.m90)
+alph.lsm90$alph.m90$coefficients # Or coef(alph.lsm90$alph.m90) or coef(alph.m90)
+alph.lsm90$alph.m90$residuals
+resid(alph.lsm90$alph.m90) #OR 
+resid(alph.m90)
+
+```
+
+## 1.3 Residuals analysis  
+The residuals analysis allows us to assess whether a regression model is valid or not. For simple linear regression three graphics need to be considered:  
+– a scatterplot of the fitted values versus the residuals,  
+– a normal Q-Q plot of the residuals and  
+– a visualisation of the autocorrelations of the residuals — for time-ordered observations only  
+
+### 1.3.1 Fitted values versus residuals  
+To produce a scatterplot of the fitted values versus the residuals we can use the function plot.lmRob() from the package robust:  
+plot.lmRob(obj, which.plots=5, id.n=...) # See help(plot.lmRob) and help(plot.lmfm)  
+Try out the following commands and interpret:  
+
+```{r}
+plot.lmRob(alph.ls, which.plots=5, id.n=10)
+plot.lmRob(alph.m90, which.plots=5, id.n=10)
+```
+
+### 1.3.2 Normal Q-Q plot of residuals  
+To produce a normal Q-Q plot of the residuals we can again use the function plot.lmRob() from the package robust:
+plot.lmRob(obj, which.plots=2, id.n=..., envelope=...)
+Note that so-called ‘modified residuals’ are used, which are the residuals rescaled to have variance σ2 (as opposed to the standardised residuals which have variance 1); see ‘Details’ in help(plot.lmfm) or help(rmodified).  
+
+Try out the following commands and interpret:
+
+```{r}
+plot.lmRob(alph.ls, which.plots=2, id.n=10, envelope=FALSE)
+plot.lmRob(alph.m90, which.plots=2, id.n=10, envelope=FALSE)
+```
+
+### 1.3.3 Autocorrelations of residuals  
+For time-ordered observations, and if the residuals are normally distributed (!), it is possible to use the function acf() to visualise the autocorrelations of the residuals in order to check the independence
+between the residuals. If there are significant autocorrelations, it is necessary to perform a so-called ‘time series analysis’ (not covered in this course).  
+Example: acf(resid(obj) # See help(acf)
+
+Try out the following commands and comment:
+
+```{r}
+acf(resid(alph.ls))
+acf(resid(alph.m90))
+```
+
+### 1.3.4 Comparison between classic and robust residuals  
+If one wants to compare different methods of estimation, e.g. classic versus robust, one can use the function plot() and as input the object obj obtained by fit.models(). To use the function plot() in this context, type: plot(obj, which.plots=..., id.n=..., envelope=...)
+
+```{r}
+plot(alph.lsm90, which.plots=5, id.n=10)
+plot(alph.lsm90, which.plots=2, id.n=10, envelope=FALSE)
+
+```
+
+## 1.4 Visualisation of the regression line  
+As the simple regression considers only two variables it is possible to visualize the estimated regression line by adding it to the scatter plot using the function abline():  
+abline(list, lty=...) # See help(abline)  
+legend(location, c(...), lty=...) # See help(legend)  
+Try out the following commands and comment  
+
+```{r}
+require(MASS)
+attach(Alphabet)
+plot(GNP, Alphabetises)
+abline(alph.ls, lty=1)
+abline(alph.lms, lty=2)
+abline(alph.m90, lty=3)
+abline(alph.m60, lty=4)
+legend("bottomright", c("LS", "LMS", "M-est. 90%", "M-est. 60%"), lty=1:4)
+detach("Alphabet")
+
+```
+
+## 1.5 Confidence intervals for the predicted responses  
+Once the final model is chosen it is possible to get ‘Confidence Intervals’ (CI) for the predicted responses.  
+
+### 1.5.1 Computation   
+The function TabPredict() computes the CI for the predicted responses:  
+IC.lm = TabPredict(dataset.lm, conf.level=...)  
+IC.lm
+
+```{r}
+IC.ls = TabPredict(alph.ls)
+IC.ls
+IC.m60 = TabPredict(alph.m60)
+IC.m60
+IC.m90 = TabPredict(alph.m90)
+IC.m90
+```
+
+### 1.5.2 Visualisation  
+As we are considering a simple linear regression, it is possible to superpose the confidence intervals on the scatterplot. The procedure to do this is as follows:  
+order.X = order(X) # Rearrange into ascending order.  
+lines(X[order.X], IC.lm[order.X, n.col], lty=...) # Connect the points with a line.  
+
+```{r}
+attach(Alphabet)
+plot(GNP, Alphabetises)
+abline(alph.ls, lty=1)
+abline(alph.m60, lty=4)
+abline(alph.m90, lty=2)
+order.X = order(GNP)
+lines(GNP[order.X], IC.ls[order.X, 2], lty=1) # Lower limit.
+lines(GNP[order.X], IC.ls[order.X, 3], lty=1) # Upper limit.
+lines(GNP[order.X], IC.m60[order.X, 2], lty=4)
+lines(GNP[order.X], IC.m60[order.X, 3], lty=4)
+lines(GNP[order.X], IC.m90[order.X, 2], lty=2)
+lines(GNP[order.X], IC.m90[order.X, 3], lty=2)
+legend("right", c("LS", "M-est. 90%", "M-est. 60%"), lty=c(1, 2, 4))
+detach("Alphabet")
+
+```
+
+## 2 Exercises  
+1. Perform the complete analysis for the data sets PretBanc (using prets as response variable) and SAT (using SALARY as response variable and using the other variables, one-by-one, as explanatory variables).  
+
+
+2. For all the data sets analysed, i.e. for Alphabet, PretBanc and SAT, answer the following questions:  
+ What are the estimated values for β0 and β1 using classic (LS) and robust (M-estimation) estimation?  
+ How do you interpret them?  
+ By performing the residuals analysis do you consider the models to be valid or not?  
+ Are the parameters significant?  
+ How large are the R2s for your models (classic and robust)? How do you interpret them?  
+
+```{r}
+attach(PretBanc)
+plot(ethnique, prets)
+pl.ls = lm(loh(prets) ~ ethnique)
+pb.m90 = lmRob(log(prets) ~ ethnique)
+pb.m90 = lmRob(log(prets) ~ ethnique, control=lmRob)
+```
+
+
+

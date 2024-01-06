@@ -1,0 +1,51 @@
+"STATE" "SALARY" "VERBAL" "MATH" "TOTAL"
+"Alabama" 31.144 491 538 1029
+"Alaska" 47.951 445 489 934
+"Arizona" 32.175 448 496 944
+"Arkansas" 28.934 482 523 1005
+"California" 41.078 417 485 902
+"Colorado" 34.571 462 518 980
+"Connecticut" 50.045 431 477 908
+"Delaware" 39.076 429 468 897
+"Florida" 32.588 420 469 889
+"Georgia" 32.291 406 448 854
+"Hawaii" 38.518 407 482 889
+"Idaho" 29.783 468 511 979
+"Illinois" 39.431 488 560 1048
+"Indiana" 36.785 415 467 882
+"Iowa" 31.511 516 583 1099
+"Kansas" 34.652 503 557 1060
+"Kentucky" 32.257 477 522 999
+"Louisiana" 26.461 486 535 1021
+"Maine" 31.972 427 469 896
+"Maryland" 40.661 430 479 909
+"Massachusetts" 40.795 430 477 907
+"Michigan" 41.895 484 549 1033
+"Minnesota" 35.948 506 579 1085
+"Mississippi" 26.818 496 540 1036
+"Missouri" 31.189 495 550 1045
+"Montana" 28.785 473 536 1009
+"Nebraska" 30.922 494 556 1050
+"Nevada" 34.836 434 483 917
+"New Hampshire" 34.72 444 491 935
+"New Jersey" 46.087 420 478 898
+"New Mexico" 28.493 485 530 1015
+"New York" 47.612 419 473 892
+"North Carolina" 30.793 411 454 865
+"North Dakota" 26.327 515 592 1107
+"Ohio" 36.802 460 515 975
+"Oklahoma" 28.172 491 536 1027
+"Oregon" 38.555 448 499 947
+"Pennsylvania" 44.51 419 461 880
+"Rhode Island" 40.729 425 463 888
+"South Carolina" 30.279 401 443 844
+"South Dakota" 25.994 505 563 1068
+"Tennessee" 32.477 497 543 1040
+"Texas" 31.223 419 474 893
+"Utah" 29.082 513 563 1076
+"Vermont" 35.406 429 472 901
+"Virginia" 33.987 428 468 896
+"Washington" 36.151 443 494 937
+"West Virginia" 31.944 448 484 932
+"Wisconsin" 37.746 501 572 1073
+"Wyoming" 31.285 476 525 1001
